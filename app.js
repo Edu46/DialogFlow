@@ -1,37 +1,43 @@
 //destructuring 
-const { frutas, dinero } = require("./frutas");
+//const { frutas, dinero } = require("./frutas");
 
 const express = require('express');
 const app = express();
 
+require('dotenv').config()
+
 const port = process.env.PORT || 3000;
+
+//Conexión a base de datos
+const mongoose = require('mongoose');
+
+const uri = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.iqym7.mongodb.net/${process.env.BDNAME}?retryWrites=true&w=majority`;
+
+mongoose.connect(uri, 
+    {useNewUrlParser: true, useUnifiedTopology: true}
+).then(() => console.log('Base de datos conectada')
+
+).catch(e => console.log(e))
 
 //motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
 //Middleware
-app.use(express.static(__dirname + "/public"))
+app.use(express.static(__dirname + "/public"));
 
-//Rutas express
-app.get('/', (req, res) =>{
-    res.render("index", {titulo : "mi titulo dinámico"});
-});
+//Ruta web
+app.use('/',require('./router/rutasWeb'));
+app.use('/pedidos',require('./router/rutaPedidos'));
 
-//Rutas express
-app.get('/servicios', (req, res) =>{
-    res.render("servicios", {tituloDeServicios : "mi titulo dinamico de servicios"});
-});
-
-//Rutas express
-app.listen(port, () => {
-    console.log(`servidor a su servicio en el puerto, ${port}`);
-});
-
-//Middleware
 app.use((req, res, next) =>{
     res.status('404').render("404",{
         titulo:"404",
-        descripcion: "Titulo del citio web"
+        descripcion: "No encontrado"
     })
+});
+
+//Mensaje para funcionamiento del servidor
+app.listen(port, () => {
+    console.log(`servidor a su servicio en el puerto, ${port}`);
 });
