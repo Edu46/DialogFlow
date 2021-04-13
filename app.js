@@ -2,9 +2,19 @@
 //const { frutas, dinero } = require("./frutas");
 
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 
-require('dotenv').config()
+//Revisa ésta nueva forma
+/*app.use(express.urlencoded({ extended: true }));
+app.use(express.json());*/
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({extended: false}));
+// parse application/json
+app.use(bodyParser.json());
+
+require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 

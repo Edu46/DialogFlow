@@ -3,8 +3,10 @@ const  Schema  = mongoose.Schema;
 
 const pedidoSchema = new Schema ({
     nombre: String,
-    descripcion: String,
+    direccion: String,
+    comentarioRepartidor: String,
     numero: String,
+    chat: String,
     ingredientes: Array
 });
 

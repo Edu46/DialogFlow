@@ -1,5 +1,13 @@
 <%- include("template/cabecera", {tituloweb: 'Pagina de inicio'} ) %> 
     <div class="container">
+        <div>
+            <nav class="navbar navbar-light bg-light mt-3 rounded justify-content-between">
+                <a class="navbar-brand">Pedidos</a>
+                <form class="form-inline">
+                  <a class="btn btn-outline-success my-2 my-sm-0" type="submit" href="/pedidos/crear">Crear</a>
+                </form>
+              </nav>
+        </div>
         <table class="table">
             <thead>
               <tr>
@@ -8,6 +16,7 @@
                 <th scope="col">Direccion</th>
                 <th scope="col">Numero</th>
                 <th scope="col">Acción</th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
@@ -18,7 +27,8 @@
                             <td><%= pedido.nombre %> </td>
                             <td><%= pedido.direccion %> </td>
                             <td><%= pedido.numero %> </td>
-                        </tr>
+                            <td><a href="pedidos/<%= pedido.id %> " class="btn btn-outline-secondary">Editar</a></td>
+                         </tr>
                     <% }) %>
                 <% } %>
               </tbody>
