@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-console.log('estas en pedidos.js');
-
 const Pedido = require('../models/pedido');
 const { route } = require('./rutasWeb');
 

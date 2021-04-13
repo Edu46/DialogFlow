@@ -4,6 +4,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const {WebhookClient} = require('dialogflow-fulfillment');
 
 //Revisa ésta nueva forma
 /*app.use(express.urlencoded({ extended: true }));
@@ -51,3 +52,38 @@ app.use((req, res, next) =>{
 app.listen(port, () => {
     console.log(`servidor a su servicio en el puerto, ${port}`);
 });
+
+//Endpoint exposed to DialogFlow
+app.post('/webwook', express.json(), (req, res) => {
+
+    //Agent is initialized
+    const agent = new WebhookClient({ request:req, response:res });
+
+    //Logs to know whats is happen
+    console.log('Dialogflow Request headers: ' + JSON.stringify(req.headers));
+    console.log('Dialogflow Request body: ' + JSON.stringify(req.body));
+
+
+    const pizzaSizes = ['individual', 'mediana', 'familiar'];
+    
+    function welcome(agent) {
+
+        agent.add(`¡Hola, bienvenido a pizzería Demo!`);
+        agent.add('¿De qué tamaño quiere que sea su pizza?');
+        //agent.add('Las opciones son individual, mediana y familiar desde webhook normal.');
+                      
+    }
+        
+    function fallback(agent) {
+        agent.add('Ups, no he entendido a que te refieres.');
+        agent.add('¿Podrías repetirlo, por favor?');
+        agent.add('Lo siento, no entedí lo que trataste de decirme.');
+    }
+    
+    let intentMap = new Map();
+    intentMap.set('Default Welcome Intent', welcome);
+    intentMap.set('Default Fallback Intent', fallback);
+
+    agent.handleRequest(intentMap);
+
+})

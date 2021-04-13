@@ -5,6 +5,5 @@ const router = express.Router();
 router.get('/', (req, res) =>{
     res.render("index", {titulo : "mi titulo dinámico"});
 });
-console.log('estas enel index')
 
 module.exports = router;
