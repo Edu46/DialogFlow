@@ -1,6 +1,7 @@
 <%- include("template/cabecera", {tituloweb: 'Crear nuevo pedido'}) %> 
     <div class="container mt-2">
         <h1>Crear</h1>
+        <!--Se retorna el action a la ruta de pedidos.js para crear con el POST-->
         <form action="/pedidos" method="POST">
             <input name="nombre" type="text" placeholder="Nombre" class="form-control my-2">
             <input name="direccion" type="text" placeholder="Direccion" class="form-control my-2">

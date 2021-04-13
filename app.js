@@ -38,7 +38,7 @@ app.use(express.static(__dirname + "/public"));
 
 //Ruta web
 app.use('/',require('./router/rutasWeb'));
-app.use('/pedidos',require('./router/rutaPedidos'));
+app.use('/pedidos',require('./router/pedidos'));
 
 app.use((req, res, next) =>{
     res.status('404').render("404",{
