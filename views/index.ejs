@@ -2,13 +2,25 @@
 <h1 class="text-info mt-3">Quiere Picza!?</h1>    
 <div id="inicio" class="content" >
     <h1 class="display-1 container mt-3">Bienvenido!</h1>
-        <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-        <df-messenger
-        intent="WELCOME"
-        chat-title="Dialog"
-        agent-id="b85b67ef-0f67-4908-91bd-2b7f43f9178f"
-        language-code="es"
-        ></df-messenger>
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <meta name="viewport" content="width-device-width, initial-scale=1">
+    <df-messenger
+      intent="WELCOME"
+      chat-title="Dialog"
+      agent-id="b85b67ef-0f67-4908-91bd-2b7f43f9178f"
+      language-code="es"
+    ></df-messenger>
 </div>
 
 <%- include("template/footer") %> 
+
+<style>
+  df-messenger {
+   --df-messenger-bot-message: #3fbeb4;
+   --df-messenger-button-titlebar-color: #4794c7;
+   --df-messenger-chat-background-color: #fafafa;
+   --df-messenger-font-color: white;
+   --df-messenger-send-icon: #878fac;
+   --df-messenger-user-message: #479b3d;
+  }
+</style>

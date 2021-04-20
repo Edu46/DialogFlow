@@ -11,10 +11,11 @@
         <table class="table">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
+                <th scope="col">ID Pedido</th>
+                <!--<th scope="col">Nombre</th>-->
                 <th scope="col">Direccion</th>
                 <th scope="col">Numero</th>
+                <th scope="col" >Ingredientes</th>
                 <th scope="col">Acción</th>
                 <th scope="col"></th>
               </tr>
@@ -24,9 +25,10 @@
                     <% arrayPedidos.forEach(pedido => { %>
                         <tr>
                             <th scope="row"><%= pedido.id %> </th>
-                            <td><%= pedido.nombre %> </td>
+                            <!--<td><%= pedido.nombre %> </td>-->
                             <td><%= pedido.direccion %> </td>
                             <td><%= pedido.numero %> </td>
+                            <td><%= pedido.ingrediente %></td>
                             <td><a href="pedidos/<%= pedido.id %> " class="btn btn-outline-secondary">Editar</a></td>
                          </tr>
                     <% }) %>

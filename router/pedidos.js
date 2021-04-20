@@ -1,19 +1,22 @@
 const express = require('express');
 const router = express.Router();
 
+console.log('entro a pantalla pedidios')
+
 const Pedido = require('../models/pedido');
-const { route } = require('./rutasWeb');
 
 router.get(('/'), async (req, res) => {
     try{
         const arrayPedidoDB = await Pedido.find();
+        //console.log(arrayPedidoDB);
         res.render("pedidos",{
-            arrayPedidos: arrayPedidoDB 
+            arrayPedidos: arrayPedidoDB
         });
     }catch(error){
         console.log(error);
     }   
 });
+
 
 router.get('/crear',(req,res) =>{
     res.render('crear')
