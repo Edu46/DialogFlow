@@ -1,1 +1,1 @@
-Creation of ChatBot with Dialog flow, use of  Node.js, Heroku, midelware, MongoDB Atlas, dotevn. 
+Creation of ChatBot with Dialogflow, use of  Node.js, ngrok, midelware, MongoDB Atlas, dotevn.
