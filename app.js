@@ -9,9 +9,7 @@ const {Card, Suggestion} = require('dialogflow-fulfillment');
 
 
 //mongodb models
-const pedidosDialog = require('./models/pedidosDialog');
 const servicio = require('./router/servicios');
-const { json } = require('express');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -45,7 +43,7 @@ app.post('/', express.json(), (req, res) => {
     console.log('Dialogflow Request body: ' + JSON.stringify(req.body));
 
     async function welcome(agent) {
-        agent.add(`Hola  👋 !!, Bienvenido a Edd´s Pizza. 🍕 que tamaño de Pizza desea ordenar? 🙇`);
+        agent.add(`Hola  👋 !!, Bienvenido a Edd´s Pizza. 🍕 `);
         const tamaniosPizza = await servicio.obtenerTamanios();
         for(let tamanioPizza of tamaniosPizza){
             agent.add(new Suggestion(tamanioPizza));
@@ -57,7 +55,18 @@ app.post('/', express.json(), (req, res) => {
               'tamano':agent.parameters.tamano,
               }
         });
+        agent.add(`Cual es tu nombre?`);
+    }
 
+    function obtainName(agent){
+        agent.context.set({
+            'name':'obtain-name',
+            'lifespan': 10,
+            'parameters':{
+              'tamano':agent.parameters.name,
+            }
+        })
+        agent.add(`que tamaño de Pizza desea ordenar? 🙇`);
     }
 
     function sizePizza(agent) {
@@ -123,24 +132,20 @@ app.post('/', express.json(), (req, res) => {
             }
         });
         
-        agent.add(`Listo!! tu Pizza llegara pronto...`);
+        agent.add(`Listo!! tu Pizza llegara pronto... 🙌`);
 
-        agent.add(`Por ultimo me gustaria confirmar tu pedido...`);
+        agent.add(`Por ultimo me gustaria confirmar tu pedido...  👨‍🍳`);
 
-        agent.add(`Pizza de tamaño:`);
         const tamano = agent.context.get('tamano-pizza');
-        agent.add(`${tamano.parameters.tamano}`);
-
-        agent.add(`con ingredientes`);
         const ingrediente = agent.context.get('ingredientes-pizza');
-        agent.add(`${ingrediente.parameters.ingredinete}`);
-
-        agent.add(`La direción es:`);
         const  direccion = agent.context.get('domicilio-obtenido');
-        agent.add(`${direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area']}`);
 
-        agent.add(`A el numero es:`)
-        agent.add(`${agent.parameters['phone-number']}`);
+        agent.add(`Tamaño 🍕 : ${tamano.parameters.tamano}`);
+        agent.add(`Ingredientes 🧾 : ${ingrediente.parameters.ingredinete}`);
+        agent.add(`Dirección 🏡 : ${direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area']}`);
+        agent.add(`Numero de contacto 📱 : ${agent.parameters['phone-number']}`)
+
+        updateIngredients();
 
         agent.add(new Suggestion('Sí'));
         agent.add(new Suggestion('No'));
@@ -166,6 +171,9 @@ app.post('/', express.json(), (req, res) => {
         const pedidoBD = await servicio.guardarPedidosDialog(pedido);
         console.log(pedidoBD + 'return de bd');
         agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
+
+
+
     }
 
     function addressNo(agent){
@@ -174,6 +182,31 @@ app.post('/', express.json(), (req, res) => {
 
     function fallback(agent) {
         agent.add(`Lo siento, puedes intentar de nuevo?`);
+    }
+
+    async function updateIngredients(){
+        const ingredientesBD = await servicio.ingredientesBD();
+        const pedidoBD = await servicio.obtenerPedidos();
+
+        let cantidad = 0;
+
+        console.log(pedidoBD);
+        console.log(ingredientesBD);
+
+        for(let i=0; i<= pedidoBD.ingrediente.length-1; i++){
+            let  ingrediente = pedidoBD.ingrediente[i];
+            for(let i=0; i<= ingredientesBD.length-1; i++){
+                if(ingrediente == ingredientesBD[i].ingrediente){
+                    cantidad = ingredientesBD[i].cantidad - 1;
+                    const ingredienteUpdate = {
+                        id: ingredientesBD[i]._id,
+                        ingrediente: ingredientesBD[i].ingrediente,   
+                        cantidad: cantidad 
+                    }
+                    console.log(ingredienteUpdate);
+                }
+            }
+        }
     }
 
 

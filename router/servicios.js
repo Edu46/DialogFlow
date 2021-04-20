@@ -4,6 +4,7 @@ const router = express.Router();
 const Tamanio = require('../models/tamanio');
 const Ingrediente = require('../models/ingredientes');
 const pedidoDialog = require('../models/pedidosDialog');
+const Pedido = require('../models/pedido');
 
 function obtenerTamanios(){
     return new Promise ((resolve, reject) =>{
@@ -32,9 +33,23 @@ function ingredientes(){
                 for(let i=0; i<=data.length-1; i++){
                     arrayIngedientesDB[i] = data[i].ingrediente;
                 }
-                resolve(arrayIngedientesDB);
+                resolve(arrayIngedientesDB, data);
             })
 
+        }catch(error){
+            reject(error);
+        }
+    })
+}
+
+function ingredientesBD(){
+    return new Promise((resolve, reject) =>{
+        try{
+            Ingrediente.find()
+            .then(data =>{
+                resolve(data);
+            })
+            
         }catch(error){
             reject(error);
         }
@@ -46,7 +61,6 @@ function ingredientes(){
 
 
 function guardarPedidosDialog(pedido){
-    console.log(pedido);
     const newPedido = new pedidoDialog(pedido);
     return new Promise((resolve, reject) =>{
         try{
@@ -70,6 +84,20 @@ function guardarPedidosDialog(pedido){
     })
 }
 
+function obtenerPedidos(){
+    return new Promise((resolve, reject) =>{
+        try{
+            Pedido.findOne({_id: '607dfe65120b832a6c7944c8'})
+            .then(data =>{
+                resolve(data);
+            })
 
-module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog};
+        }catch(error){
+            reject(error);
+        }
+    }) 
+}
+
+
+module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog, ingredientesBD, obtenerPedidos};
 

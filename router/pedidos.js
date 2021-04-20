@@ -8,7 +8,14 @@ const Pedido = require('../models/pedido');
 router.get(('/'), async (req, res) => {
     try{
         const arrayPedidoDB = await Pedido.find();
-        //console.log(arrayPedidoDB);
+        // for(let i = 0; i<= arrayPedidoDB.length-1; i++ ){
+        //     const item = JSON.stringify(arrayPedidoDB[i]);
+        //     console.log(item);
+        //     //console.log(`${i} : `, JSON.stringify(arrayPedidoDB[i].ingrediente[0]) );            
+        //     // for(let x = 0; x <= arrayPedidoDB[i].ingrediente.length-1; x++){
+        //     //     console.log(arrayPedidoDB[i].ingrediente[x]);
+        //     // }
+        // }
         res.render("pedidos",{
             arrayPedidos: arrayPedidoDB
         });

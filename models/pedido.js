@@ -2,12 +2,10 @@ const  mongoose = require('mongoose');
 const  Schema  = mongoose.Schema;
 
 const pedidoSchema = new Schema ({
-    nombre: String,
+    ingrediente: Array,
+    tamano: String,
     direccion: String,
-    comentarioRepartidor: String,
-    numero: String,
-    chat: String,
-    ingredientes: Array
+    numero: String
 });
 
 const Pedido = mongoose.model('pedido', pedidoSchema);
