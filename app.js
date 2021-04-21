@@ -117,7 +117,7 @@ app.post('/', express.json(), (req, res) => {
             'name':'domicilio-obtenido',
             'lifespan': 5,
             'parameters':{
-              'location':agent.parameters['street-address'],
+              'location':agent.query,
               }
         });
         agent.add(`Telefono :`);
@@ -142,7 +142,7 @@ app.post('/', express.json(), (req, res) => {
 
         agent.add(`Tamaño 🍕 : ${tamano.parameters.tamano}`);
         agent.add(`Ingredientes 🧾 : ${ingrediente.parameters.ingredinete}`);
-        agent.add(`Dirección 🏡 : ${direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area']}`);
+        agent.add(`Dirección 🏡 : ${direccion.parameters.location + ' ' + direccion.parameters.location['subadmin-area']}`);
         agent.add(`Numero de contacto 📱 : ${agent.parameters['phone-number']}`)
 
         updateIngredients();
@@ -164,7 +164,7 @@ app.post('/', express.json(), (req, res) => {
         const pedido = {
             tamano:tamano.parameters.tamano,
             ingrediente:ingrediente.parameters.ingredinete,
-            direccion: direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area'],
+            direccion: direccion.parameters.location + ' ' + direccion.parameters.location['subadmin-area'],
             numero:numero.parameters.numero,
         }
 
