@@ -10,6 +10,7 @@ const {Card, Suggestion} = require('dialogflow-fulfillment');
 
 //mongodb models
 const servicio = require('./router/servicios');
+const { stringify } = require('actions-on-google/dist/common');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -123,18 +124,17 @@ app.post('/', express.json(), (req, res) => {
                 agent.add(new Suggestion(tamanioPizza));
             } 
         }   
-        
     }
 
     async function mostrarIngredientsYes(agent){
         //Añadir validacion de ingrediente no disponible
         const context = agent.context.get('size-pizza');
         const ingredientes = await servicio.ingredientes();
-        console.log(context);
-        agent.add(`Estos son los disponibles: ${ingredientes}`);
+        agent.add(`Estos son los disponibles : ${ingredientes}`);
+        agent.add(`Cuales de ellos deseas?`);
         agent.context.set({
             'name':'ingredients-pizza',
-            'lifespan': 2,
+            'lifespan': 3,
             'parameters':{
               'tamano':context.parameters.tamano,
               'name': context.parameters.name
@@ -150,7 +150,7 @@ app.post('/', express.json(), (req, res) => {
 
         agent.context.set({
             'name':'ingredients-pizza',
-            'lifespan': 2,
+            'lifespan': 3,
             'parameters':{
               'tamano':context.parameters.tamano,
               'name': context.parameters.name
@@ -216,10 +216,7 @@ app.post('/', express.json(), (req, res) => {
         
         agent.add(`Tu dirección es ${agent.query}.`);
         agent.add(`¿Es correcto?`);
-
-        agent.add(new Suggestion('Sí'));
-        agent.add(new Suggestion('No'));
-
+        // responder con YES revienta 
         agent.context.set({
             'name':'awaiting-address',
             'lifespan': 3,
@@ -227,17 +224,19 @@ app.post('/', express.json(), (req, res) => {
               'location':agent.query,
               'name': ingredientesContext.parameters.name,
               'tamano': ingredientesContext.parameters.tamano,
-              'ingredientes': ingredientesContext.parameters.ingredientes,              
+              'ingredientes': ingredientesContext.parameters.any             
               }
         });
+
+        agent.add(new Suggestion('Sí'));
+        agent.add(new Suggestion('No'));
+
     }
 
     function obtainedAddressYes(agent){
         const domicilioContext = agent.context.get('awaiting-address');
-
         agent.add(`¿Me podrías ayudar proporcionando los siguientes datos por favor? 😀`);
         agent.add(`Telefono :`);
-
         agent.context.set({
             'name':'obtained-address',
             'lifespan': 3,
@@ -245,16 +244,15 @@ app.post('/', express.json(), (req, res) => {
               'name': domicilioContext.parameters.name,
               'tamano': domicilioContext.parameters.tamano,
               'ingredientes': domicilioContext.parameters.ingredientes,
-              'location':domicilioContext.domicilioContext.parameters.location
+              'location':domicilioContext.parameters.location
               }
         });
     }
 
     function obtainedAddressNo(agent){
         const domicilioContext = agent.context.get('awaiting-address');
-
         agent.add(`No hay problema, ¿me podrías proporcionar tu dirección?`);
-
+        console.log('obtainedAddressNo ', domicilioContext);
         agent.context.set({
             'name':'obtained-ingredients',
             'lifespan': 3,
@@ -267,14 +265,11 @@ app.post('/', express.json(), (req, res) => {
     }
 
     function obtainedNumber(agent){
+        agent.context.set({name: 'awaiting-address', lifespan:0});
         const domicilioContext = agent.context.get('obtained-address');
-
         agent.add(`Tu número telefónico es ${agent.parameters['phone-number']}`);
         agent.add(`¿Es correcto?`);
-
-        agent.add(new Suggestion('Sí'));
-        agent.add(new Suggestion('No'));
-
+        console.log(domicilioContext);
         agent.context.set({
             'name':'awaiting-obtained-number',
             'lifespan': 3,
@@ -286,35 +281,52 @@ app.post('/', express.json(), (req, res) => {
               'number': agent.parameters['phone-number']
               }
         });
+
+        agent.add(new Suggestion('Sí'));
+        agent.add(new Suggestion('No'));
     }
 
-    function obtainedNumberYes(agent){
+    async function obtainedNumberYes(agent){
         const numberContext = agent.context.get('awaiting-obtained-number');
+        console.log(numberContext);
 
-        agent.context.set({
-            'name': 'obtained-number',
-            'lifespan':5,
-            'parameters':{
-              'name': numberContext.parameters.name,
-              'tamano': numberContext.parameters.tamano,
-              'ingredientes': numberContext.parameters.ingredientes,
-              'location':numberContext.parameters.location,
-              'number': numberContext.parameters.number
-            }
-        });
+        // agent.context.set({
+        //     'name': 'obtained-number',
+        //     'lifespan':5,
+        //     'parameters':{
+        //       'name': numberContext.parameters.name,
+        //       'tamano': numberContext.parameters.tamano,
+        //       'ingredientes': numberContext.parameters.any,
+        //       'location':numberContext.parameters.location,
+        //       'number': numberContext.parameters.number
+        //     }
+        // });
         
         agent.add(`Listo!! tu Pizza llegará pronto... 🙌`);
 
-        agent.add(`Por último me gustaría confirmar tu pedido...  👨‍🍳`);
-
+        //agent.add(`Por último me gustaría confirmar tu pedido...  👨‍🍳`);
+        agent.add(`Nombre 😀 : ${numberContext.parameters.name}`)
         agent.add(`Tamaño 🍕 : ${numberContext.parameters.tamano}`);
         agent.add(`Ingredientes 🧾 : ${numberContext.parameters.ingredientes}`);
         agent.add(`Dirección 🏡 : ${numberContext.parameters.location}`);
         agent.add(`Numero de contacto 📱 : ${numberContext.parameters.number}`);
+
+        const pedido = {
+            name: stringify(numberContext.parameters.name),
+            tamano: numberContext.parameters.tamano,
+            ingrediente: numberContext.parameters.ingredientes,
+            direccion: numberContext.parameters.location,
+            numero: numberContext.parameters.number,
+        }
+        console.log(pedido);
+
+        // const pedidoBD = await servicio.guardarPedidosDialog(pedido);
+        // console.log(pedidoBD + 'return de bd');
+        // agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
     }
 
     function obtainedNumberNo(agent){
-        const numberContext = agent.context.get('awaiting-obtained-phone');
+        const numberContext = agent.context.get('awaiting-obtained-number');
 
         agent.add(`No hay problema, ¿me podrías proporcionar tu número telefónico?`);
 
@@ -324,7 +336,7 @@ app.post('/', express.json(), (req, res) => {
             'parameters':{
                 'name': numberContext.parameters.name,
                 'tamano': numberContext.parameters.tamano,
-                'ingredientes': numberContext.parameters.ingredientes,  
+                'ingredientes': numberContext.parameters.any,  
                 'location':numberContext.parameters.location              
                 }
         });
@@ -332,32 +344,22 @@ app.post('/', express.json(), (req, res) => {
 
     //Lomas de las palmas 456 sentido comumo int 6 guadalajara jalisco
 
-    async function addressYes(agent){
-        const numberContext = agent.context.get('obtained-phone');
-        agent.add(`Listo, llegará en unos minutos tu Pizza`)
+    // async function obtainedOrder(agent){
+    //     const numberContext = agent.context.get('obtained-phone');
+    //     agent.add(`Listo, llegará en unos minutos tu Pizza`)
 
-        // const tamano = agent.context.get('tamano-pizza');
-        // const ingrediente = agent.context.get('ingredientes-pizza');
-        // const numero = agent.context.get('obtener-numero');
-        // const direccion = agent.context.get('domicilio-obtenido');
-
-        const pedido = {
-            tamano: numberContext.parameters.tamano,
-            ingrediente: numberContext.parameters.ingredientes,
-            direccion: numberContext.parameters.location,
-            numero: numberContext.parameters.number,
-        }
-    }
+    //     const pedido = {
+    //         tamano: numberContext.parameters.tamano,
+    //         ingrediente: numberContext.parameters.any,
+    //         direccion: numberContext.parameters.location,
+    //         numero: numberContext.parameters.number,
+    //     }
+    //     console.log(pedido);
+    // }
     //     const pedidoBD = await servicio.guardarPedidosDialog(pedido);
     //     console.log(pedidoBD + 'return de bd');
     //     agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
 
-
-
-    // }
-
-    // function addressNo(agent){
-    //     agent.add(`Para modificar tu pedido puedes repetir los ingredientes, la dirección o el tamaño por el que deseas cambiar`);
     // }
 
     function fallback(agent) {
@@ -397,13 +399,16 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('name.user.obtained - yes', obtainNameYes);
     intentMap.set('name.user.obtained - no', obtainNameNo);
     intentMap.set('pizza.size.obtained', sizePizza);
-    intentMap.set('ingredients - yes',ingredientsYes);
+    intentMap.set('ingredients - yes', ingredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
-    intentMap.set('ingredients - no',ingredientsNo);
+    intentMap.set('ingredients - no', ingredientsNo);
     intentMap.set('address.obtained', obtainedAddress);
-    intentMap.set('number.obtained',obtainedNumber),
-    intentMap.set('address-yes',obtainedAddressYes);
-    intentMap.set('address-no',obtainedAddressNo);
+    intentMap.set('address-yes', obtainedAddressYes);
+    intentMap.set('address-no', obtainedAddressNo);
+    intentMap.set('number.obtained', obtainedNumber),
+    intentMap.set('number.obtained - yes', obtainedNumberYes),
+    intentMap.set('number.obtained - no', obtainedNumberNo),
+    //intentMap.set('obtain.order', obtainedOrder),
     intentMap.set('fallback.client', fallback);
     agent.handleRequest(intentMap);
 
