@@ -212,7 +212,7 @@ app.post('/', express.json(), (req, res) => {
     }
 
     function obtainedAddress(agent){
-        const ingredientesContext = agent.context.get('ingredients-pizza');
+        const ingredientesContext = agent.context.get('obtained-ingredients');
         
         agent.add(`Tu dirección es ${agent.query}.`);
         agent.add(`¿Es correcto?`);
@@ -256,7 +256,7 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`No hay problema, ¿me podrías proporcionar tu dirección?`);
 
         agent.context.set({
-            'name':'ingredientes-pizza',
+            'name':'obtained-ingredients',
             'lifespan': 3,
             'parameters':{
                 'name': domicilioContext.parameters.name,
