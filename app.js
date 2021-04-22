@@ -96,7 +96,7 @@ app.post('/', express.json(), (req, res) => {
 
     }
 
-    function sizePizza(agent) {
+    async function sizePizza(agent) {
         const tamaniosPizza = await servicio.obtenerTamanios();
 
         if(tamaniosPizza.includes(agent.parameters.tamano)){
@@ -159,17 +159,19 @@ app.post('/', express.json(), (req, res) => {
         });
     }
 
-    function ingredientsPizza(agent){
+    async function ingredientsPizza(agent){
         const ingredientesContext = agent.context.get('ingredients-pizza');
 
         const ingredientesBD = await servicio.ingredientes();               //Ingredientes de la base de datos
-        const ingredientesSeleccionados = agent.parameters.ingredientes;    //Ingredientes seleccionados por usuario
+        const ingredientesSeleccionados = agent.parameters.ingrediente;    //Ingredientes seleccionados por usuario
+        console.log(ingredientesSeleccionados);
+        
         let ingredientesNoDisponibles = [];                 //Array vacío para ingresar los ingredientes no disponibles
 
         //Iteración por cada ingrediente seleccionado por usuario
         for(let ingredienteSeleccionado of ingredientesSeleccionados){
             //Revisa si el ingrediente seleccionado está incluido en los ingredientes de la base de datos
-            if(ingredientesBD.includes(ingredienteSeleccionado)){
+            if(!ingredientesBD.includes(ingredienteSeleccionado)){
                 ingredientesNoDisponibles.push(ingredienteSeleccionado);//Agrega ingrediente no disponible a arreglo
             }
         }
@@ -224,7 +226,7 @@ app.post('/', express.json(), (req, res) => {
               'location':agent.query,
               'name': ingredientesContext.parameters.name,
               'tamano': ingredientesContext.parameters.tamano,
-              'ingredientes': ingredientesContext.parameters.any             
+              'ingredientes': ingredientesContext.parameters.ingrediente             
               }
         });
 
@@ -296,7 +298,7 @@ app.post('/', express.json(), (req, res) => {
         //     'parameters':{
         //       'name': numberContext.parameters.name,
         //       'tamano': numberContext.parameters.tamano,
-        //       'ingredientes': numberContext.parameters.any,
+        //       'ingredientes': numberContext.parameters.ingrediente,
         //       'location':numberContext.parameters.location,
         //       'number': numberContext.parameters.number
         //     }
@@ -336,7 +338,7 @@ app.post('/', express.json(), (req, res) => {
             'parameters':{
                 'name': numberContext.parameters.name,
                 'tamano': numberContext.parameters.tamano,
-                'ingredientes': numberContext.parameters.any,  
+                'ingredientes': numberContext.parameters.ingrediente,  
                 'location':numberContext.parameters.location              
                 }
         });
@@ -350,7 +352,7 @@ app.post('/', express.json(), (req, res) => {
 
     //     const pedido = {
     //         tamano: numberContext.parameters.tamano,
-    //         ingrediente: numberContext.parameters.any,
+    //         ingrediente: numberContext.parameters.ingrediente,
     //         direccion: numberContext.parameters.location,
     //         numero: numberContext.parameters.number,
     //     }
@@ -399,9 +401,9 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('name.user.obtained - yes', obtainNameYes);
     intentMap.set('name.user.obtained - no', obtainNameNo);
     intentMap.set('pizza.size.obtained', sizePizza);
-    intentMap.set('ingredients - yes', ingredientsYes);
+    intentMap.set('ingredients - yes', mostrarIngredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
-    intentMap.set('ingredients - no', ingredientsNo);
+    intentMap.set('ingredients - no', mostrarIngredientsNo);
     intentMap.set('address.obtained', obtainedAddress);
     intentMap.set('address-yes', obtainedAddressYes);
     intentMap.set('address-no', obtainedAddressNo);
