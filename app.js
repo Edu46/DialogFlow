@@ -126,7 +126,7 @@ app.post('/', express.json(), (req, res) => {
         
     }
 
-    async function ingredientsYes(agent){
+    async function mostrarIngredientsYes(agent){
         //Añadir validacion de ingrediente no disponible
         const context = agent.context.get('size-pizza');
         const ingredientes = await servicio.ingredientes();
@@ -136,7 +136,6 @@ app.post('/', express.json(), (req, res) => {
             'name':'ingredients-pizza',
             'lifespan': 2,
             'parameters':{
-              'ingredientes':agent.parameters.ingrediente,
               'tamano':context.parameters.tamano,
               'name': context.parameters.name
               
@@ -144,7 +143,7 @@ app.post('/', express.json(), (req, res) => {
         });
     }
 
-    function ingredientsNo(agent){
+    function mostrarIngredientsNo(agent){
         const context = agent.context.get('size-pizza');
         //Añadir validacion de ingrediente no disponible
         agent.add(`Que ingrediente deseas?`);
@@ -153,7 +152,6 @@ app.post('/', express.json(), (req, res) => {
             'name':'ingredients-pizza',
             'lifespan': 2,
             'parameters':{
-              'ingredientes':agent.parameters.ingrediente,
               'tamano':context.parameters.tamano,
               'name': context.parameters.name
               
@@ -162,12 +160,54 @@ app.post('/', express.json(), (req, res) => {
     }
 
     function ingredientsPizza(agent){
-        agent.add(`Excelente decisión:`);
-        const context = agent.context.get('ingredients-pizza');
-        agent.add(`${context.parameters.any}`);
-        console.log(context);
-        agent.add(`Pizza lista!!, me podrias ayudar proporcionando los siguientes datos por favor? 😀`);
-        agent.add(`Dirección :`);
+        const ingredientesContext = agent.context.get('ingredients-pizza');
+
+        const ingredientesBD = await servicio.ingredientes();               //Ingredientes de la base de datos
+        const ingredientesSeleccionados = agent.parameters.ingredientes;    //Ingredientes seleccionados por usuario
+        let ingredientesNoDisponibles = [];                 //Array vacío para ingresar los ingredientes no disponibles
+
+        //Iteración por cada ingrediente seleccionado por usuario
+        for(let ingredienteSeleccionado of ingredientesSeleccionados){
+            //Revisa si el ingrediente seleccionado está incluido en los ingredientes de la base de datos
+            if(ingredientesBD.includes(ingredienteSeleccionado)){
+                ingredientesNoDisponibles.push(ingredienteSeleccionado);//Agrega ingrediente no disponible a arreglo
+            }
+        }
+        
+        //Si hay ingredientes no disponibles
+        if(ingredientesNoDisponibles.length > 0){
+            agent.add(`Lo sentímos, los siguientes ingredientes no están disponibles: ${ingredientesNoDisponibles}.`);
+            agent.add(`Estos son los ingredientes disponibles: ${ingredientesBD}.`);
+            agent.add(`Qué ingredientes deseas?`);
+
+            agent.context.set({
+                'name':'ingredients-pizza',
+                'lifespan': 2,
+                'parameters':{                  
+                  'name': ingredientesContext.parameters.name,
+                  'tamano': ingredientesContext.parameters.tamano,
+                  }
+            });
+        }
+        else{
+            agent.add(`Excelente decisión:`);
+            const context = agent.context.get('ingredients-pizza');
+            //agent.add(`${context.parameters.ingredientes}`);
+            agent.add(`${ingredientesSeleccionados}`);
+            console.log(context);
+            agent.add(`Pizza lista!!, me podrias ayudar proporcionando los siguientes datos por favor? 😀`);
+            agent.add(`Dirección :`);
+
+            agent.context.set({
+                'name':'obtained-ingredients',
+                'lifespan': 2,
+                'parameters':{                  
+                  'name': ingredientesContext.parameters.name,
+                  'tamano': ingredientesContext.parameters.tamano,
+                  'ingredientes': ingredientesSeleccionados              
+                  }
+            });
+        }        
     
     }
 
