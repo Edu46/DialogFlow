@@ -160,62 +160,143 @@ app.post('/', express.json(), (req, res) => {
     
     }
 
-    // function obtainedAddress(agent){
-    //     agent.context.set({
-    //         'name':'domicilio-obtenido',
-    //         'lifespan': 5,
-    //         'parameters':{
-    //           'location':agent.parameters['street-address'],
-    //           }
-    //     });
-    //     agent.add(`Telefono :`);
-    // }
-
-    // function obtainedNumber(agent){
-    //     agent.context.set({
-    //         'name': 'obtener-numero',
-    //         'lifespan':5,
-    //         'parameters':{
-    //             'numero': agent.parameters['phone-number'],
-    //         }
-    //     });
+    function obtainedAddress(agent){
+        const ingredientesContext = agent.context.get('ingredients-pizza');
         
-    //     agent.add(`Listo!! tu Pizza llegara pronto... 🙌`);
+        agent.add(`Tu dirección es ${agent.query}.`);
+        agent.add(`¿Es correcto?`);
 
-    //     agent.add(`Por ultimo me gustaria confirmar tu pedido...  👨‍🍳`);
+        agent.add(new Suggestion('Sí'));
+        agent.add(new Suggestion('No'));
 
-    //     const tamano = agent.context.get('tamano-pizza');
-    //     const ingrediente = agent.context.get('ingredientes-pizza');
-    //     const  direccion = agent.context.get('domicilio-obtenido');
+        agent.context.set({
+            'name':'awaiting-address',
+            'lifespan': 3,
+            'parameters':{
+              'location':agent.query,
+              'name': ingredientesContext.parameters.name,
+              'tamano': ingredientesContext.parameters.tamano,
+              'ingredientes': ingredientesContext.parameters.ingredientes,              
+              }
+        });
+    }
 
-    //     agent.add(`Tamaño 🍕 : ${tamano.parameters.tamano}`);
-    //     agent.add(`Ingredientes 🧾 : ${ingrediente.parameters.ingredinete}`);
-    //     agent.add(`Dirección 🏡 : ${direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area']}`);
-    //     agent.add(`Numero de contacto 📱 : ${agent.parameters['phone-number']}`)
+    function obtainedAddressYes(agent){
+        const domicilioContext = agent.context.get('awaiting-address');
 
-    //     updateIngredients();
+        agent.add(`¿Me podrías ayudar proporcionando los siguientes datos por favor? 😀`);
+        agent.add(`Telefono :`);
 
-    //     agent.add(new Suggestion('Sí'));
-    //     agent.add(new Suggestion('No'));
-    // }
+        agent.context.set({
+            'name':'obtained-address',
+            'lifespan': 3,
+            'parameters':{
+              'name': domicilioContext.parameters.name,
+              'tamano': domicilioContext.parameters.tamano,
+              'ingredientes': domicilioContext.parameters.ingredientes,
+              'location':domicilioContext.domicilioContext.parameters.location
+              }
+        });
+    }
 
-    // //Lomas de las palmas 456 sentido comumo int 6 guadalajara jalisco
+    function obtainedAddressNo(agent){
+        const domicilioContext = agent.context.get('awaiting-address');
 
-    // async function addressYes(agent){
-    //     agent.add(`Listo, llegara en unos minutos tu Pizza`)
+        agent.add(`No hay problema, ¿me podrías proporcionar tu dirección?`);
 
-    //     const tamano = agent.context.get('tamano-pizza');
-    //     const ingrediente = agent.context.get('ingredientes-pizza');
-    //     const numero = agent.context.get('obtener-numero');
-    //     const direccion = agent.context.get('domicilio-obtenido');
+        agent.context.set({
+            'name':'ingredientes-pizza',
+            'lifespan': 3,
+            'parameters':{
+                'name': domicilioContext.parameters.name,
+                'tamano': domicilioContext.parameters.tamano,
+                'ingredientes': domicilioContext.parameters.ingredientes                
+                }
+        });
+    }
 
-    //     const pedido = {
-    //         tamano:tamano.parameters.tamano,
-    //         ingrediente:ingrediente.parameters.ingredinete,
-    //         direccion: direccion.parameters.location['street-address'] + ' ' + direccion.parameters.location['subadmin-area'],
-    //         numero:numero.parameters.numero,
-    //     }
+    function obtainedNumber(agent){
+        const domicilioContext = agent.context.get('obtained-address');
 
+        agent.add(`Tu número telefónico es ${agent.parameters['phone-number']}`);
+        agent.add(`¿Es correcto?`);
+
+        agent.add(new Suggestion('Sí'));
+        agent.add(new Suggestion('No'));
+
+        agent.context.set({
+            'name':'awaiting-obtained-number',
+            'lifespan': 3,
+            'parameters':{
+              'name': domicilioContext.parameters.name,
+              'tamano': domicilioContext.parameters.tamano,
+              'ingredientes': domicilioContext.parameters.ingredientes,
+              'location':domicilioContext.parameters.location,
+              'number': agent.parameters['phone-number']
+              }
+        });
+    }
+
+    function obtainedNumberYes(agent){
+        const numberContext = agent.context.get('awaiting-obtained-number');
+
+        agent.context.set({
+            'name': 'obtained-number',
+            'lifespan':5,
+            'parameters':{
+              'name': numberContext.parameters.name,
+              'tamano': numberContext.parameters.tamano,
+              'ingredientes': numberContext.parameters.ingredientes,
+              'location':numberContext.parameters.location,
+              'number': numberContext.parameters.number
+            }
+        });
+        
+        agent.add(`Listo!! tu Pizza llegará pronto... 🙌`);
+
+        agent.add(`Por último me gustaría confirmar tu pedido...  👨‍🍳`);
+
+        agent.add(`Tamaño 🍕 : ${numberContext.parameters.tamano}`);
+        agent.add(`Ingredientes 🧾 : ${numberContext.parameters.ingredientes}`);
+        agent.add(`Dirección 🏡 : ${numberContext.parameters.location}`);
+        agent.add(`Numero de contacto 📱 : ${numberContext.parameters.number}`);
+    }
+
+    function obtainedNumberNo(agent){
+        const numberContext = agent.context.get('awaiting-obtained-phone');
+
+        agent.add(`No hay problema, ¿me podrías proporcionar tu número telefónico?`);
+
+        agent.context.set({
+            'name':'obtained-address',
+            'lifespan': 3,
+            'parameters':{
+                'name': numberContext.parameters.name,
+                'tamano': numberContext.parameters.tamano,
+                'ingredientes': numberContext.parameters.ingredientes,  
+                'location':numberContext.parameters.location              
+                }
+        });
+    }
+
+    //Lomas de las palmas 456 sentido comumo int 6 guadalajara jalisco
+
+    async function addressYes(agent){
+        const numberContext = agent.context.get('obtained-phone');
+        agent.add(`Listo, llegará en unos minutos tu Pizza`)
+
+        // const tamano = agent.context.get('tamano-pizza');
+        // const ingrediente = agent.context.get('ingredientes-pizza');
+        // const numero = agent.context.get('obtener-numero');
+        // const direccion = agent.context.get('domicilio-obtenido');
+
+        const pedido = {
+            tamano: numberContext.parameters.tamano,
+            ingrediente: numberContext.parameters.ingredientes,
+            direccion: numberContext.parameters.location,
+            numero: numberContext.parameters.number,
+        }
+    }
     //     const pedidoBD = await servicio.guardarPedidosDialog(pedido);
     //     console.log(pedidoBD + 'return de bd');
     //     agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
@@ -268,10 +349,10 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('ingredients - yes',ingredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
     intentMap.set('ingredients - no',ingredientsNo);
-    // intentMap.set('address.obtained', obtainedAddress);
-    // intentMap.set('number.obtained',obtainedNumber),
-    // intentMap.set('address-yes',addressYes);
-    // intentMap.set('address-no',addressNo);
+    intentMap.set('address.obtained', obtainedAddress);
+    intentMap.set('number.obtained',obtainedNumber),
+    intentMap.set('address-yes',obtainedAddressYes);
+    intentMap.set('address-no',obtainedAddressNo);
     intentMap.set('fallback.client', fallback);
     agent.handleRequest(intentMap);
 
