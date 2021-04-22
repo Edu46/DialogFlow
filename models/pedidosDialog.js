@@ -5,7 +5,9 @@ const pedidosSchema = new Schema ({
     tamano: String,
     ingrediente: Array,
     direccion: String,
-    numero: Number
+    numero: Number,
+    name: String
+
 });
 
 const pedidoDialog = mongoose.model('pedidos', pedidosSchema);
