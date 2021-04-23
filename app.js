@@ -384,7 +384,7 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`Numero de contacto 📱 : ${numberContext.parameters.number}`);
 
         const pedido = {
-            name: stringify(numberContext.parameters.name),
+            name: numberContext.parameters.name,
             tamano: numberContext.parameters.tamano,
             ingrediente: numberContext.parameters.ingredientes,
             direccion: numberContext.parameters.location,
