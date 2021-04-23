@@ -263,24 +263,61 @@ app.post('/', express.json(), (req, res) => {
             });
         }
         else{
-            agent.add(`Excelente decisión:`);
-            //agent.add(`${context.parameters.ingredientes}`);
-            agent.add(`${ingredientesSeleccionados}`);
-            agent.add(`Pizza lista!!, me podrias ayudar proporcionando los siguientes datos por favor? 😀`);
-            agent.add(`Dirección :`);
-            
+            agent.add(`¿Estos son tus ingredientes seleccionados?`);            
+            agent.add(`${ingredientesSeleccionados}`);            
+
             agent.context.set({
-                'name':'obtained-ingredients',
-                'lifespan': 2,
+                'name':'awaiting-ingredients-pizza',
+                'lifespan': 1,
                 'parameters':{                  
                   'name': ingredientesContext.parameters.name,
                   'tamano': ingredientesContext.parameters.tamano,
                   'ingredientes': ingredientesSeleccionados              
                   }
             });
+
+            agent.add(new Suggestion('Sí'));
+            agent.add(new Suggestion('No'));
+
             agent.context.set({name: 'ingredients-pizza', lifespan:0});
         }        
     
+    }
+
+    function ingredientsPizzaYes(agent){
+        const ingredientesContext = agent.context.get('awaiting-ingredients-pizza');
+        agent.add(`Pizza lista!!, me podrias ayudar proporcionando los siguientes datos por favor? 😀`);
+        agent.add(`Dirección :`);
+
+        
+        agent.context.set({
+            'name':'obtained-ingredients',
+            'lifespan': 2,
+            'parameters':{                  
+                'name': ingredientesContext.parameters.name,
+                'tamano': ingredientesContext.parameters.tamano,
+                'ingredientes': ingredientesContext.parameters.ingredientes 
+            }
+        });
+
+        agent.context.set({name: 'awaiting-ingredients-pizza', lifespan:0});
+    }
+
+    async function ingredientsPizzaNo(agent) {
+        const ingredientesContext = agent.context.get('awaiting-ingredients-pizza');
+        agent.add(`No hay problema, ¿me podrías decir que ingredientes deseas?`);
+
+        const ingredientesBD = await servicio.ingredientes(); 
+        agent.add(`Estos son los ingredientes disponibles: ${ingredientesBD}.`);
+        
+        agent.context.set({
+            'name':'ingredients-pizza',
+            'lifespan': 1,
+            'parameters':{                  
+                'name': ingredientesContext.parameters.name,
+                'tamano': ingredientesContext.parameters.tamano,                             
+            }
+        });
     }
 
     function obtainedAddress(agent){
@@ -518,6 +555,8 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('ingredients - yes', showIngredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
     intentMap.set('ingredients - no', showIngredientsNo);
+    intentMap.set('aqui va el nombre', ingredientsPizzaYes);
+    intentMap.set('aqui va el nombre', ingredientsPizzaNo);
     intentMap.set('address.obtained', obtainedAddress);
     intentMap.set('address-yes', obtainedAddressYes);
     intentMap.set('address-no', obtainedAddressNo);
