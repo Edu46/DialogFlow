@@ -123,18 +123,32 @@ app.post('/', express.json(), (req, res) => {
         const tamaniosPizza = await servicio.obtenerTamanios();
 
         if(tamaniosPizza.includes(agent.parameters.tamano)){
+
+            agent.add(`Genial! 👏`);
+            agent.add(`Todas nuestras  Pizzas cuentan con el mejor queso 🧀 y salsa 🍅 Italiana 👌, 
+            ¿deseas ver la lista de ingredientes? 🙇`);
             
             agent.context.set({
-                'name':'awaiting-size-pizza',
-                'lifespan': 2,
-                'parameters':{
+                name: 'size-pizza',
+                lifespan: 1,
+                parameters: {
                     'name': context.parameters.name,
-                    'tamano':agent.parameters.tamano,
+                    'tamano': agent.parameters.tamano,                
                 }
-            });
-            agent.add(`Tu pizza será de tamaño ${agent.parameters.tamano}.`);
-            agent.add(`¿Estás de acuerdo?`);
-            
+            })
+
+            ////Código que se utilizaba cuándo se tenía que confirmar el tamaño de la pizza
+            // agent.context.set({
+            //     'name':'awaiting-size-pizza',
+            //     'lifespan': 2,
+            //     'parameters':{
+            //         'name': context.parameters.name,
+            //         'tamano':agent.parameters.tamano,
+            //     }
+            // });
+            // agent.add(`Tu pizza será de tamaño ${agent.parameters.tamano}.`);
+            // agent.add(`¿Estás de acuerdo?`);
+                        
             agent.add(new Suggestion('Sí'));
             agent.add(new Suggestion('No'));
         }
@@ -155,48 +169,48 @@ app.post('/', express.json(), (req, res) => {
         }   
     }
 
-    function sizePizzaYes(agent){
-        const tamanoPizzaContext = agent.context.get('awaiting-size-pizza');
+    // function sizePizzaYes(agent){
+    //     const tamanoPizzaContext = agent.context.get('awaiting-size-pizza');
 
-        agent.add(`Genial ! 👏`);
-        agent.add(`Todas nuestras  Pizzas cuentan con el mejor queso 🧀 y salsa 🍅 Italiana 👌, 
-        deseas ver la lista de ingredientes? 🙇`);
+    //     agent.add(`Genial ! 👏`);
+    //     agent.add(`Todas nuestras  Pizzas cuentan con el mejor queso 🧀 y salsa 🍅 Italiana 👌, 
+    //     ¿deseas ver la lista de ingredientes? 🙇`);
         
-        agent.context.set({
-            name: 'size-pizza',
-            lifespan: 2,
-            parameters: {
-                'name': tamanoPizzaContext.parameters.name,
-                'tamano':tamanoPizzaContext.parameters.tamano,                
-            }
-        })
+    //     agent.context.set({
+    //         name: 'size-pizza',
+    //         lifespan: 2,
+    //         parameters: {
+    //             'name': tamanoPizzaContext.parameters.name,
+    //             'tamano':tamanoPizzaContext.parameters.tamano,                
+    //         }
+    //     })
 
-        agent.add(new Suggestion('Sí'));
-        agent.add(new Suggestion('No'));
+    //     agent.add(new Suggestion('Sí'));
+    //     agent.add(new Suggestion('No'));
 
-    }
+    // }
 
-    async function sizePizzaNo(agent){
-        const tamanoPizzaContext = agent.context.get('awaiting-size-pizza');
+    // async function sizePizzaNo(agent){
+    //     const tamanoPizzaContext = agent.context.get('awaiting-size-pizza');
         
-        agent.context.set({name:'awaiting-name-user', lifespan: 0,});
-        agent.context.set({name: 'name-user', lifespan:0});
+    //     agent.context.set({name:'awaiting-name-user', lifespan: 0,});
+    //     agent.context.set({name: 'name-user', lifespan:0});
 
-        agent.add(`Qué tamaño de Pizza desea ordenar? 🙇`);
+    //     agent.add(`Qué tamaño de Pizza desea ordenar? 🙇`);
 
-        const tamaniosPizza = await servicio.obtenerTamanios();
-        for(let tamanioPizza of tamaniosPizza){
-            agent.add(new Suggestion(tamanioPizza));
-        }
+    //     const tamaniosPizza = await servicio.obtenerTamanios();
+    //     for(let tamanioPizza of tamaniosPizza){
+    //         agent.add(new Suggestion(tamanioPizza));
+    //     }
         
-        agent.context.set({
-            name:'obtained-name-user', 
-            lifespan: 1,
-            parameters: {
-                name: tamanoPizzaContext.parameters.name
-            }
-        })
-    }
+    //     agent.context.set({
+    //         name:'obtained-name-user', 
+    //         lifespan: 1,
+    //         parameters: {
+    //             name: tamanoPizzaContext.parameters.name
+    //         }
+    //     })
+    // }
 
     async function showIngredientsYes(agent){
         //Añadir validacion de ingrediente no disponible
