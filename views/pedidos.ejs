@@ -4,7 +4,7 @@
             <nav class="navbar navbar-light bg-light mt-3 rounded justify-content-between">
                 <a class="navbar-brand">Pedidos</a>
                 <form class="form-inline">
-                  <a class="btn btn-outline-success my-2 my-sm-0" type="submit" href="/pedidos/crear">Crear</a>
+                  <!-- <a class="btn btn-outline-success my-2 my-sm-0" type="submit" href="/pedidos/crear">Crear</a> -->
                 </form>
               </nav>
         </div>
@@ -12,10 +12,12 @@
             <thead>
               <tr>
                 <th scope="col">ID Pedido</th>
-                <!--<th scope="col">Nombre</th>-->
+                <th scope="col">Nombre</th>
                 <th scope="col">Direccion</th>
                 <th scope="col">Numero</th>
-                <th scope="col">Acción</th>
+                <th scope="col">Tamano</th>
+                <th scope="col">Ingredientes</th>
+                <!-- <th scope="col">Acción</th> -->
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -24,10 +26,12 @@
                     <% arrayPedidos.forEach(pedido => { %>
                         <tr>
                             <th scope="row"><%= pedido.id %> </th>
-                            <!--<td><%= pedido.nombre %> </td>-->
-                            <td><%= pedido.direccion %> </td>
-                            <td><%= pedido.numero %> </td>
-                            <td><a href="pedidos/<%= pedido.id %> " class="btn btn-outline-secondary">Editar</a></td>
+                            <td><%= pedido.name %></td>
+                            <td><%= pedido.direccion %></td>
+                            <td><%= pedido.numero %></td>
+                            <td><%= pedido.tamano %></td>
+                            <td><%= pedido.ingrediente %></td>
+                            <!-- <td><a href="pedidos/<%= pedido.id %> " class="btn btn-outline-secondary">Editar</a></td> -->
                          </tr>
                     <% }) %>
                 <% } %>

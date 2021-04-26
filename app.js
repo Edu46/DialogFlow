@@ -48,7 +48,7 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`Cual es tu nombre?`);
         agent.context.set({
             'name':'name-user',
-            'lifespan': 3,
+            'lifespan': 1,
         })
     }
 
@@ -57,7 +57,7 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`Saludos ${agent.parameters.name.name}`);
         agent.add(`Es correcto tu nombre?`);
 
-        agent.context.set({name:'awaiting-name-user', lifespan: 1,
+        agent.context.set({name:'awaiting-name-user', lifespan: 2,
             parameters:{
                 name: contextNameUser.parameters.name,
             }
@@ -235,7 +235,6 @@ app.post('/', express.json(), (req, res) => {
 
         const ingredientesBD = await servicio.ingredientes();               //Ingredientes de la base de datos
         const ingredientesSeleccionados = agent.parameters.ingrediente;    //Ingredientes seleccionados por usuario
-        console.log(ingredientesSeleccionados);
         
         let ingredientesNoDisponibles = [];                 //Array vacío para ingresar los ingredientes no disponibles
 
@@ -300,7 +299,7 @@ app.post('/', express.json(), (req, res) => {
             }
         });
 
-        agent.context.set({name: 'awaiting-ingredients-pizza', lifespan:0});
+        //agent.context.set({name: 'awaiting-ingredients-pizza', lifespan:0});
     }
 
     async function ingredientsPizzaNo(agent) {
@@ -362,7 +361,6 @@ app.post('/', express.json(), (req, res) => {
     function obtainedAddressNo(agent){
         const domicilioContext = agent.context.get('awaiting-address');
         agent.add(`No hay problema, ¿me podrías proporcionar tu dirección?`);
-        console.log('obtainedAddressNo ', domicilioContext);
         agent.context.set({
             'name':'obtained-ingredients',
             'lifespan': 3,
@@ -378,7 +376,6 @@ app.post('/', express.json(), (req, res) => {
         const domicilioContext = agent.context.get('obtained-address');
         agent.add(`Tu número telefónico es ${agent.parameters['phone-number']}`);
         agent.add(`¿Es correcto?`);
-        console.log(domicilioContext);
         agent.context.set({
             'name':'awaiting-obtained-number',
             'lifespan': 3,
@@ -397,7 +394,6 @@ app.post('/', express.json(), (req, res) => {
 
     async function obtainedNumberYes(agent){
         const numberContext = agent.context.get('awaiting-obtained-number');
-        console.log(numberContext);
 
         agent.context.set({
             'name': 'obtained-number',
@@ -552,11 +548,11 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('pizza.size.obtained', sizePizza);
     intentMap.set('pizza.size.obtained - yes', sizePizzaYes);
     intentMap.set('pizza.size.obtained - no', sizePizzaNo);
-    intentMap.set('ingredients - yes', showIngredientsYes);
+    intentMap.set('ingredientsShow - yes', showIngredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
-    intentMap.set('ingredients - no', showIngredientsNo);
-    intentMap.set('aqui va el nombre', ingredientsPizzaYes);
-    intentMap.set('aqui va el nombre', ingredientsPizzaNo);
+    intentMap.set('ingredientsShow - no', showIngredientsNo);
+    intentMap.set('ingredients - yes', ingredientsPizzaYes);
+    intentMap.set('ingredients - no', ingredientsPizzaNo);
     intentMap.set('address.obtained', obtainedAddress);
     intentMap.set('address-yes', obtainedAddressYes);
     intentMap.set('address-no', obtainedAddressNo);
