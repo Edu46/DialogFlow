@@ -395,21 +395,20 @@ app.post('/', express.json(), (req, res) => {
     async function obtainedNumberYes(agent){
         const numberContext = agent.context.get('awaiting-obtained-number');
 
-        agent.context.set({
-            'name': 'obtained-number',
-            'lifespan':5,
-            'parameters':{
-              'name': numberContext.parameters.name,
-              'tamano': numberContext.parameters.tamano,
-              'ingredientes': numberContext.parameters.ingrediente,
-              'location':numberContext.parameters.location,
-              'number': numberContext.parameters.number
-            }
-        });
-        
+        // agent.context.set({
+        //     'name': 'obtained-number',
+        //     'lifespan':5,
+        //     'parameters':{
+        //       'name': numberContext.parameters.name,
+        //       'tamano': numberContext.parameters.tamano,
+        //       'ingredientes': numberContext.parameters.ingrediente,
+        //       'location':numberContext.parameters.location,
+        //       'number': numberContext.parameters.number
+        //     }
+        // });
+
         agent.add(`Listo!! tu Pizza llegará pronto... 🙌`);
 
-        //agent.add(`Por último me gustaría confirmar tu pedido...  👨‍🍳`);
         agent.add(`Nombre 😀 : ${numberContext.parameters.name}`)
         agent.add(`Tamaño 🍕 : ${numberContext.parameters.tamano}`);
         agent.add(`Ingredientes 🧾 : ${numberContext.parameters.ingredientes}`);
@@ -417,7 +416,7 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`Numero de contacto 📱 : ${numberContext.parameters.number}`);
 
         const pedido = {
-            name: stringify(numberContext.parameters.name),
+            name: numberContext.parameters.name,
             tamano: numberContext.parameters.tamano,
             ingrediente: numberContext.parameters.ingredientes,
             direccion: numberContext.parameters.location,
@@ -429,10 +428,21 @@ app.post('/', express.json(), (req, res) => {
         console.log(pedidoBD + 'return de bd');
         agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
 
-        agent.context.set({name: 'obtained-number', lifespan:0});
         agent.context.set({name: 'awaiting-obtained-number', lifespan:0});
-    }
 
+        agent.context.set({name:'user-exit', 
+            lifespan: 1,
+            'parameters':{
+                'id': pedidoBD._id
+            }
+        });
+
+        agent.add('Deseas realizar otra orden?');
+
+        agent.add(new Suggestion('Sí'));
+        agent.add(new Suggestion('No'));
+    }
+    
     function obtainedNumberNo(agent){
         const numberContext = agent.context.get('awaiting-obtained-number');
 
@@ -449,6 +459,34 @@ app.post('/', express.json(), (req, res) => {
                 }
         });
     }
+
+
+    async function obtainexitYes(agent){
+        const exitContext = agent.context.get('user-exit');
+        const orderBD = await servicio.obtenerPedidos(exitContext.parameters.id); //Usuario de la base de datos
+        console.log(orderBD.name);  
+        agent.context.set({
+            name:'obtained-name-user', 
+            lifespan: 1,
+            parameters: {
+                name: orderBD.name
+            }
+        })
+        const tamaniosPizza = await servicio.obtenerTamanios();
+        agent.add('Que tamaño de pizza desea?');
+        for(let tamanioPizza of tamaniosPizza){
+            agent.add(new Suggestion(tamanioPizza));
+        }
+    }
+
+    function obtainexitNo(agent){
+        agent.add('Hasta luego!');
+        agent.context.set({name: 'user-exit', lifespan:0});
+    }
+
+
+
+    //Fallback
 
     function fallback(agent) {
         agent.add(`Lo siento, puedes intentar de nuevo?`);
@@ -513,6 +551,16 @@ app.post('/', express.json(), (req, res) => {
         });
         agent.add(`No entendí muy bien, ¿Me podrías repetir tu número?`);
     }
+
+    function fallbackname(agent) {
+        const awaitingNameContext = agent.context.get('name-user');
+        agent.context.set({
+            'name':'name-user',
+            'lifespan': 2,
+        });
+        agent.add(`No entendí muy bien, ¿Me podrías repetir tu nombre?`);
+    }
+
     // async function updateIngredients(){
     //     const ingredientesBD = await servicio.ingredientesBD();
     //     const pedidoBD = await servicio.obtenerPedidos();
@@ -556,14 +604,17 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('address.obtained', obtainedAddress);
     intentMap.set('address-yes', obtainedAddressYes);
     intentMap.set('address-no', obtainedAddressNo);
-    intentMap.set('number.obtained', obtainedNumber),
-    intentMap.set('number.obtained - yes', obtainedNumberYes),
-    intentMap.set('number.obtained - no', obtainedNumberNo),
-    intentMap.set('fallback.client', fallback);
+    intentMap.set('number.obtained', obtainedNumber);
+    intentMap.set('number.obtained - yes', obtainedNumberYes);
+    intentMap.set('number.obtained - no', obtainedNumberNo);
+    intentMap.set('obtain.exit - yes', obtainexitYes);
+    intentMap.set('obtain.exit - no', obtainexitNo);
+    intentMap.set('Fallback.global', fallback);
     intentMap.set('Fallback.sizePizza', fallbacksizePizza);
     intentMap.set('Fallback.ingredientsPizza', fallbackIngredientsPizza);
     intentMap.set('Fallback.obtainedAddress', fallbackObtainedAddress);
     intentMap.set('Fallback.obtainedNumber', fallbackObtainedNumber);
+    intentMap.set('Fallback.name', fallbackname);
     agent.handleRequest(intentMap);
 
   })

@@ -6,7 +6,7 @@ const pedidosSchema = new Schema ({
     ingrediente: Array,
     direccion: String,
     numero: Number,
-    name: String
+    name: Array
 
 });
 
