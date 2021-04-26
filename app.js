@@ -38,6 +38,11 @@ app.post('/', express.json(), (req, res) => {
 
     //Agent is initialized
     const agent = new WebhookClient({ request:req, response:res });
+    const cantidadIngredientesPizza = {
+        'Chica': 1,
+        'Mediana': 2,
+        'Grande': 3 
+    }
 
     //Logs to know whats is happen
     console.log('Dialogflow Request headers: ' + JSON.stringify(req.headers));
@@ -216,8 +221,23 @@ app.post('/', express.json(), (req, res) => {
         //Añadir validacion de ingrediente no disponible
         const context = agent.context.get('size-pizza');
         const ingredientes = await servicio.ingredientes();
+
+        const tamanoPizza  = context.parameters.tamano;
+        let cantidadIngredientes = 0;
+
+        for(pizza in cantidadIngredientesPizza){
+            if(pizza == tamanoPizza){
+                cantidadIngredientes = cantidadIngredientesPizza[pizza];
+                break;
+            }
+        }
+
         agent.add(`Estos son los disponibles : ${ingredientes}`);
-        agent.add(`Cuales de ellos deseas?`);
+        if(cantidadIngredientes == 1 )
+            agent.add(`¿Cuál sería el ingrediente de tu pizza?`);
+        else
+            agent.add(`¿Cuáles serían los ${cantidadIngredientes} ingredientes de tu pizza?`);
+
         agent.context.set({
             'name':'ingredients-pizza',
             'lifespan': 2,
@@ -231,9 +251,22 @@ app.post('/', express.json(), (req, res) => {
 
     function showIngredientsNo(agent){
         const context = agent.context.get('size-pizza');
-        //Añadir validacion de ingrediente no disponible
-        agent.add(`Que ingredientes deseas?`);
+        
+        const tamanoPizza  = context.parameters.tamano;
+        let cantidadIngredientes = 0;
 
+        for(pizza in cantidadIngredientesPizza){
+            if(pizza == tamanoPizza){
+                cantidadIngredientes = cantidadIngredientesPizza[pizza];
+                break;
+            }
+        }
+
+        if(cantidadIngredientes == 1 )
+            agent.add(`¿Cuál sería el ingrediente de tu pizza?`);
+        else
+            agent.add(`¿Cuáles serían los ${cantidadIngredientes} ingredientes de tu pizza?`);
+        
         agent.context.set({
             'name':'ingredients-pizza',
             'lifespan': 1,
