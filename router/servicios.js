@@ -84,14 +84,15 @@ function guardarPedidosDialog(pedido){
     })
 }
 
-function obtenerPedidos(){
+function obtenerPedidos(id){
+    console.log('Desde el Servicio.js: ', id)
     return new Promise((resolve, reject) =>{
         try{
-            Pedido.findOne({_id: '607dfe65120b832a6c7944c8'})
+            pedidoDialog.findOne({_id: id})
             .then(data =>{
                 resolve(data);
             })
-
+            
         }catch(error){
             reject(error);
         }
