@@ -535,8 +535,85 @@ app.post('/', express.json(), (req, res) => {
 
     //Fallback
 
-    function fallback(agent) {
-        agent.add(`Lo siento, puedes intentar de nuevo?`);
+    async function fallback(agent) {
+        agent.add(`Lo siento, no pude entender lo que me dijiste.`);
+
+        const sessionId = agent.session;
+        const session = await servicio.obtenerContexto(sessionId);
+
+        switch (session.contextOutput){
+            case 'awaiting-ingredients-pizza':
+                agent.add(`¿Estos son tus ingredientes seleccionados?`);            
+                agent.add(`${session.parameters.ingredientes}`);            
+
+                agent.context.set({
+                    'name':'awaiting-ingredients-pizza',
+                    'lifespan': 1,
+                    'parameters':{                  
+                        'name': session.parameters.name,
+                        'tamano': session.parameters.tamano,
+                        'ingredientes': session.parameters.ingredientes              
+                    }
+                });
+
+                agent.add(new Suggestion('Sí'));
+                agent.add(new Suggestion('No'));
+                break;
+            case 'awaiting-address':
+                agent.add(`Tu dirección es ${session.parameters.location}.`);
+                agent.add(`¿Es correcto?`);
+
+                agent.context.set({
+                    'name':'awaiting-address',
+                    'lifespan': 1,
+                    'parameters':{
+                        'name': session.parameters.name,
+                        'tamano': session.parameters.tamano,
+                        'ingredientes': session.parameters.ingredientes,
+                        'location': session.parameters.location
+                    }
+                });
+
+                agent.add(new Suggestion('Sí'));
+                agent.add(new Suggestion('No'));
+                break;
+            case 'awaiting-obtained-number':
+                agent.add(`Tu número telefónico es ${session.parameters.number}`);
+                agent.add(`¿Es correcto?`);
+
+                agent.context.set({
+                    'name':'awaiting-obtained-number',
+                    'lifespan': 1,
+                    'parameters':{
+                        'name': session.parameters.name,
+                        'tamano': session.parameters.tamano,
+                        'ingredientes': session.parameters.ingredientes,
+                        'location':session.parameters.location,
+                        'number': session.parameters.number
+                    }
+                });
+
+                agent.add(new Suggestion('Sí'));
+                agent.add(new Suggestion('No'));
+                break;
+            case 'user-exit':
+                agent.add('¿Deseas realizar otra orden?');
+
+                agent.context.set({
+                    name:'user-exit', 
+                    lifespan: 1,
+                    'parameters':{
+                        'id': session.parameters._id
+                    }
+                });                        
+        
+                agent.add(new Suggestion('Sí'));
+                agent.add(new Suggestion('No'));
+                break;
+            default:
+                agent.add(`Puedes regresar al inicio escribiendo 'Hola'`);
+                break;
+        }
     }
 
     async function fallbacksizePizza(agent) {
