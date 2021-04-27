@@ -4,7 +4,7 @@ const router = express.Router();
 const Tamanio = require('../models/tamanio');
 const Ingrediente = require('../models/ingredientes');
 const pedidoDialog = require('../models/pedidosDialog');
-const Pedido = require('../models/pedido');
+const Sesion = require('../models/sesion');
 
 function obtenerTamanios(){
     return new Promise ((resolve, reject) =>{
@@ -57,9 +57,6 @@ function ingredientesBD(){
 }
 
 //Crear pedido DialogFlow
-
-
-
 function guardarPedidosDialog(pedido){
     const newPedido = new pedidoDialog(pedido);
     return new Promise((resolve, reject) =>{
@@ -85,7 +82,6 @@ function guardarPedidosDialog(pedido){
 }
 
 function obtenerPedidos(id){
-    console.log('Desde el Servicio.js: ', id)
     return new Promise((resolve, reject) =>{
         try{
             pedidoDialog.findOne({_id: id})
@@ -99,6 +95,58 @@ function obtenerPedidos(id){
     }) 
 }
 
+//---> SESION
 
-module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog, ingredientesBD, obtenerPedidos};
+//Crear Sesion
+function guardarSesion(SesionObject){
+    const newSesion= new Sesion(SesionObject);
+    return new Promise((resolve, reject) =>{
+        try{
+            newSesion.save()
+            .then(data =>{
+                resolve(data);
+            }).catch(error => {
+                reject(error);
+            })
+
+        }catch(error){
+            reject(error);
+            console.log(error);
+        }
+    })
+}
+
+//Obtener Sesion
+function obtenerSesion(session){
+    return new Promise((resolve, reject) =>{
+        try{
+            Sesion.findOne({session: session})
+            .then(data =>{
+                resolve(data);
+            })
+            
+        }catch(error){
+            reject(error);
+        }
+    }) 
+}
+
+async function editarSesion(SesionObject){
+    return new Promise((resolve, reject) =>{
+        const session = SesionObject.session;
+        const body = SesionObject
+        try{
+            Sesion.findOneAndUpdate(session, body, {useFindAndModify: false})
+            .then(data =>{
+                resolve(data);
+            }).catch(error =>{
+                reject(error);
+            });
+
+        }catch(error){
+            reject(error);
+        }
+    })
+}
+module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog, ingredientesBD, obtenerPedidos, editarSesion, obtenerSesion, guardarSesion};
 

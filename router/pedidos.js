@@ -16,6 +16,7 @@ router.get(('/'), async (req, res) => {
         //     //     console.log(arrayPedidoDB[i].ingrediente[x]);
         //     // }
         // }
+        console.log(arrayPedidoDB.name);
         res.render("pedidos",{
             arrayPedidos: arrayPedidoDB
         });
