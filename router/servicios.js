@@ -148,5 +148,21 @@ async function editarSesion(SesionObject){
         }
     })
 }
-module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog, ingredientesBD, obtenerPedidos, editarSesion, obtenerSesion, guardarSesion};
+
+function obtenerContexto(sessionId){
+    return new Promise((resolve, reject) =>{
+        try{
+            Sesion.findOne({session: sessionId})
+            .then(data =>{
+                resolve(data);
+            }).catch(error =>{
+                reject(error);
+            })
+            
+        }catch(error){
+            reject(error);
+        }
+    }) 
+}
+module.exports = {obtenerTamanios, ingredientes, guardarPedidosDialog, ingredientesBD, obtenerPedidos, editarSesion, obtenerSesion, guardarSesion, obtenerContexto};
 

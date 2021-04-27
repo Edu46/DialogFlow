@@ -571,7 +571,7 @@ app.post('/', express.json(), (req, res) => {
         agent.context.set({name:'user-exit', 
             lifespan: 1,
             'parameters':{
-                'id': pedidoBD._id,
+                'idPedido': pedidoBD._id,
                 'date': numberContext.parameters.date,
             }
         });
@@ -709,7 +709,7 @@ app.post('/', express.json(), (req, res) => {
                     name:'user-exit', 
                     lifespan: 1,
                     'parameters':{
-                        'id': session.parameters._id
+                        'idPedido': session.parameters.idPedido
                     }
                 });                        
         
