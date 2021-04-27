@@ -64,7 +64,8 @@ app.post('/', express.json(), (req, res) => {
 
         agent.context.set({name:'awaiting-name-user', lifespan: 2,
             parameters:{
-                name: contextNameUser.parameters.name,
+                name: contextNameUser.parameters.name.name,
+                date: Date()
             }
         });
 
@@ -81,7 +82,8 @@ app.post('/', express.json(), (req, res) => {
         agent.context.set({name:'name-user', lifespan: 0,})
         agent.context.set({name:'awaiting-name-user', lifespan: 1,
             parameters:{
-                name: contextNameUser.parameters.name,
+                name: contextNameUser.parameters.name[0],
+                date: contextNameUser.parameters.date
             }
         });
 
@@ -97,6 +99,8 @@ app.post('/', express.json(), (req, res) => {
         agent.context.set({name:'name-user', lifespan: 1,
             parameters: {
                 name: contextNameUser.parameters.name,
+                date: contextNameUser.parameters.date
+
             }
         })
     }
@@ -108,7 +112,9 @@ app.post('/', express.json(), (req, res) => {
             name:'obtained-name-user', 
             lifespan: 1,
             parameters: {
-                name: contextNameUser.parameters.name
+                name: contextNameUser.parameters.name,
+                date: contextNameUser.parameters.date
+
             }
         })
         agent.add(`Que tamaño de Pizza desea ordenar? 🙇`);
@@ -138,11 +144,12 @@ app.post('/', express.json(), (req, res) => {
                 lifespan: 1,
                 parameters: {
                     'name': context.parameters.name,
-                    'tamano': agent.parameters.tamano,                
+                    'date': context.parameters.date,
+                    'tamano': agent.parameters.tamano,                    
                 }
             })
 
-            ////Código que se utilizaba cuándo se tenía que confirmar el tamaño de la pizza
+            ////Código que se utilizaba cuándo se tenía que confirmar el tamaño de la pizza 
             // agent.context.set({
             //     'name':'awaiting-size-pizza',
             //     'lifespan': 2,
@@ -168,12 +175,14 @@ app.post('/', express.json(), (req, res) => {
                 name:'obtained-name-user', 
                 lifespan: 1,
                 parameters: {
-                    name: context.parameters.name
+                    name: context.parameters.name,
+                    date: context.parameters.date,
                 }
             })
         }   
     }
 
+    //--------------> Se quito para evitar que se pregunte 
     // function sizePizzaYes(agent){
     //     const tamanoPizzaContext = agent.context.get('awaiting-size-pizza');
 
@@ -243,6 +252,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 2,
             'parameters':{
               'tamano':context.parameters.tamano,
+              'date': context.parameters.date,
               'name': context.parameters.name
               
             }
@@ -272,6 +282,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 1,
             'parameters':{
                 'name': context.parameters.name,
+                'date': context.parameters.date,
                 'tamano':context.parameters.tamano,
             }
         });
@@ -304,6 +315,7 @@ app.post('/', express.json(), (req, res) => {
                 'lifespan': 1,
                 'parameters':{                  
                   'name': ingredientesContext.parameters.name,
+                  'date': ingredientesContext.parameters.date,
                   'tamano': ingredientesContext.parameters.tamano,
                   }
             });
@@ -314,14 +326,28 @@ app.post('/', express.json(), (req, res) => {
 
             agent.context.set({
                 'name':'awaiting-ingredients-pizza',
-                'lifespan': 1,
+                'lifespan': 2,
                 'parameters':{                  
                   'name': ingredientesContext.parameters.name,
+                  'date': ingredientesContext.parameters.date,
                   'tamano': ingredientesContext.parameters.tamano,
                   'ingredientes': ingredientesSeleccionados              
                   }
             });
 
+            const SesionObject = {
+                session: agent.session,
+                contextInput: 'ingredients-pizza',
+                contextOutput: 'awaiting-ingredients-pizza',
+                parameters: {
+                    name: ingredientesContext.parameters.name,
+                    date: ingredientesContext.parameters.date,
+                    tamano: ingredientesContext.parameters.tamano,
+                    ingredientes: ingredientesSeleccionados 
+                }
+            }
+            servicio.guardarSesion(SesionObject);
+            
             agent.add(new Suggestion('Sí'));
             agent.add(new Suggestion('No'));
 
@@ -341,10 +367,24 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 2,
             'parameters':{                  
                 'name': ingredientesContext.parameters.name,
+                'date': ingredientesContext.parameters.date,
                 'tamano': ingredientesContext.parameters.tamano,
                 'ingredientes': ingredientesContext.parameters.ingredientes 
             }
         });
+
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'awaiting-ingredients-pizza',
+            contextOutput: 'obtained-ingredients',
+            parameters: {
+                name: ingredientesContext.parameters.name,
+                date: ingredientesContext.parameters.date,
+                tamano: ingredientesContext.parameters.tamano,
+                ingredientes: ingredientesContext.parameters.ingredientes 
+            }
+        }
+        servicio.editarSesion(SesionObject);
 
         //agent.context.set({name: 'awaiting-ingredients-pizza', lifespan:0});
     }
@@ -361,6 +401,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 1,
             'parameters':{                  
                 'name': ingredientesContext.parameters.name,
+                'date': ingredientesContext.parameters.date,
                 'tamano': ingredientesContext.parameters.tamano,                             
             }
         });
@@ -371,17 +412,31 @@ app.post('/', express.json(), (req, res) => {
         
         agent.add(`Tu dirección es ${agent.query}.`);
         agent.add(`¿Es correcto?`);
-        // responder con YES revienta 
         agent.context.set({
             'name':'awaiting-address',
             'lifespan': 1,
             'parameters':{
               'location':agent.query,
               'name': ingredientesContext.parameters.name,
+              'date': ingredientesContext.parameters.date,
               'tamano': ingredientesContext.parameters.tamano,
               'ingredientes': ingredientesContext.parameters.ingredientes             
               }
         });
+
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'obtained-ingredients',
+            contextOutput: 'awaiting-address',
+            parameters: {
+                'location':agent.query,
+                'name': ingredientesContext.parameters.name,
+                'date': ingredientesContext.parameters.date,
+                'tamano': ingredientesContext.parameters.tamano,
+                'ingredientes': ingredientesContext.parameters.ingredientes  
+            }
+        }
+        servicio.editarSesion(SesionObject);
 
         agent.add(new Suggestion('Sí'));
         agent.add(new Suggestion('No'));
@@ -397,11 +452,27 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 3,
             'parameters':{
               'name': domicilioContext.parameters.name,
+              'date': domicilioContext.parameters.date,
               'tamano': domicilioContext.parameters.tamano,
               'ingredientes': domicilioContext.parameters.ingredientes,
               'location':domicilioContext.parameters.location
               }
         });
+
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'awaiting-address',
+            contextOutput: 'obtained-address',
+            parameters: {
+                'name': domicilioContext.parameters.name,
+                'date': domicilioContext.parameters.date,
+                'tamano': domicilioContext.parameters.tamano,
+                'ingredientes': domicilioContext.parameters.ingredientes,
+                'location':domicilioContext.parameters.location  
+            }
+        }
+        servicio.editarSesion(SesionObject);
+
         agent.context.set({name: 'awaiting-address', lifespan:0});
     }
 
@@ -413,6 +484,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 3,
             'parameters':{
                 'name': domicilioContext.parameters.name,
+                'date': domicilioContext.parameters.date,
                 'tamano': domicilioContext.parameters.tamano,
                 'ingredientes': domicilioContext.parameters.ingredientes                
                 }
@@ -428,6 +500,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 3,
             'parameters':{
               'name': domicilioContext.parameters.name,
+              'date': domicilioContext.parameters.date,
               'tamano': domicilioContext.parameters.tamano,
               'ingredientes': domicilioContext.parameters.ingredientes,
               'location':domicilioContext.parameters.location,
@@ -435,24 +508,27 @@ app.post('/', express.json(), (req, res) => {
               }
         });
 
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'obtained-address',
+            contextOutput: 'awaiting-obtained-number',
+            parameters: {
+                'name': domicilioContext.parameters.name,
+                'date': domicilioContext.parameters.date,
+                'tamano': domicilioContext.parameters.tamano,
+                'ingredientes': domicilioContext.parameters.ingredientes,
+                'location':domicilioContext.parameters.location,
+                'number': agent.parameters['phone-number'] 
+            }
+        }
+        servicio.editarSesion(SesionObject);
+
         agent.add(new Suggestion('Sí'));
         agent.add(new Suggestion('No'));
     }
 
     async function obtainedNumberYes(agent){
         const numberContext = agent.context.get('awaiting-obtained-number');
-
-        // agent.context.set({
-        //     'name': 'obtained-number',
-        //     'lifespan':5,
-        //     'parameters':{
-        //       'name': numberContext.parameters.name,
-        //       'tamano': numberContext.parameters.tamano,
-        //       'ingredientes': numberContext.parameters.ingrediente,
-        //       'location':numberContext.parameters.location,
-        //       'number': numberContext.parameters.number
-        //     }
-        // });
 
         agent.add(`Listo!! tu Pizza llegará pronto... 🙌`);
 
@@ -464,23 +540,39 @@ app.post('/', express.json(), (req, res) => {
 
         const pedido = {
             name: numberContext.parameters.name,
+            date: numberContext.parameters.date,
             tamano: numberContext.parameters.tamano,
             ingrediente: numberContext.parameters.ingredientes,
             direccion: numberContext.parameters.location,
             numero: numberContext.parameters.number,
         }
-        console.log(pedido);
 
         const pedidoBD = await servicio.guardarPedidosDialog(pedido);
-        console.log(pedidoBD + 'return de bd');
         agent.add(`Tu id de orden es la: ${pedidoBD._id}`);
+
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'awaiting-obtained-number',
+            contextOutput: 'user-exit',
+            parameters: {
+                name: numberContext.parameters.name,
+                date: numberContext.parameters.date,
+                tamano: numberContext.parameters.tamano,
+                ingrediente: numberContext.parameters.ingredientes,
+                direccion: numberContext.parameters.location,
+                numero: numberContext.parameters.number,
+                idPedido: pedidoBD._id
+            }
+        }
+        servicio.editarSesion(SesionObject);
 
         agent.context.set({name: 'awaiting-obtained-number', lifespan:0});
 
         agent.context.set({name:'user-exit', 
             lifespan: 1,
             'parameters':{
-                'id': pedidoBD._id
+                'id': pedidoBD._id,
+                'date': numberContext.parameters.date,
             }
         });
 
@@ -500,6 +592,7 @@ app.post('/', express.json(), (req, res) => {
             'lifespan': 3,
             'parameters':{
                 'name': numberContext.parameters.name,
+                'date': numberContext.parameters.date,
                 'tamano': numberContext.parameters.tamano,
                 'ingredientes': numberContext.parameters.ingrediente,  
                 'location':numberContext.parameters.location              
@@ -511,19 +604,32 @@ app.post('/', express.json(), (req, res) => {
     async function obtainexitYes(agent){
         const exitContext = agent.context.get('user-exit');
         const orderBD = await servicio.obtenerPedidos(exitContext.parameters.id); //Usuario de la base de datos
-        console.log(orderBD.name);  
         agent.context.set({
             name:'obtained-name-user', 
             lifespan: 1,
             parameters: {
-                name: orderBD.name
+                name: orderBD.name,
+                date: exitContext.parameters.date,
             }
         })
+
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'user-exit',
+            contextOutput: 'obtained-name-user',
+            parameters: {
+                name: orderBD.name,
+                date: orderBD.date,
+            }
+        }
+        servicio.guardarSesion(SesionObject);
+
         const tamaniosPizza = await servicio.obtenerTamanios();
         agent.add('Que tamaño de pizza desea?');
         for(let tamanioPizza of tamaniosPizza){
             agent.add(new Suggestion(tamanioPizza));
         }
+
     }
 
     function obtainexitNo(agent){
@@ -536,6 +642,7 @@ app.post('/', express.json(), (req, res) => {
     //Fallback
 
     function fallback(agent) {
+        console.log(agent);
         agent.add(`Lo siento, puedes intentar de nuevo?`);
     }
 
@@ -608,32 +715,6 @@ app.post('/', express.json(), (req, res) => {
         agent.add(`No entendí muy bien, ¿Me podrías repetir tu nombre?`);
     }
 
-    // async function updateIngredients(){
-    //     const ingredientesBD = await servicio.ingredientesBD();
-    //     const pedidoBD = await servicio.obtenerPedidos();
-
-    //     let cantidad = 0;
-
-    //     console.log(pedidoBD);
-    //     console.log(ingredientesBD);
-
-    //     for(let i=0; i<= pedidoBD.ingrediente.length-1; i++){
-    //         let  ingrediente = pedidoBD.ingrediente[i];
-    //         for(let i=0; i<= ingredientesBD.length-1; i++){
-    //             if(ingrediente == ingredientesBD[i].ingrediente){
-    //                 cantidad = ingredientesBD[i].cantidad - 1;
-    //                 const ingredienteUpdate = {
-    //                     id: ingredientesBD[i]._id,
-    //                     ingrediente: ingredientesBD[i].ingrediente,   
-    //                     cantidad: cantidad 
-    //                 }
-    //                 console.log(ingredienteUpdate);
-    //             }
-    //         }
-    //     }
-    // }
-
-
     let intentMap = new Map();
     intentMap.set('welcome.client', welcome);
     intentMap.set('name.user.obtained', obtainName);
@@ -641,8 +722,6 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('name.user.obtained - yes', obtainNameYes);
     intentMap.set('name.user.obtained - no', obtainNameNo);
     intentMap.set('pizza.size.obtained', sizePizza);
-    intentMap.set('pizza.size.obtained - yes', sizePizzaYes);
-    intentMap.set('pizza.size.obtained - no', sizePizzaNo);
     intentMap.set('ingredientsShow - yes', showIngredientsYes);
     intentMap.set('ingredients', ingredientsPizza);
     intentMap.set('ingredientsShow - no', showIngredientsNo);
