@@ -636,21 +636,13 @@ app.post('/', express.json(), (req, res) => {
 
     }
 
-    function obtainexitNo(agent){
-        const SesionObject = {
-            session: agent.session,
-            contextInput: 'user-exit',
-            contextOutput: '',
-            parameters: {
-                name: orderBD.name,
-                date: orderBD.date,
-            }
-        }
-        servicio.guardarSesion(SesionObject);
-
+    async function obtainexitNo(agent){
         agent.add('Hasta luego! 👋');
-        agent.context.set({name: 'user-exit', lifespan:0});
+        agent.context.set({name:'bye-user', lifespan: 1,})
+    }
 
+    async function byeUser(agent){
+        agent.add('👋');
     }
 
 
@@ -827,6 +819,7 @@ app.post('/', express.json(), (req, res) => {
     intentMap.set('number.obtained - no', obtainedNumberNo);
     intentMap.set('obtain.exit - yes', obtainexitYes);
     intentMap.set('obtain.exit - no', obtainexitNo);
+    intentMap.set('bye.user', byeUser);
     intentMap.set('Fallback.global', fallback);
     intentMap.set('Fallback.sizePizza', fallbacksizePizza);
     intentMap.set('Fallback.ingredientsPizza', fallbackIngredientsPizza);
