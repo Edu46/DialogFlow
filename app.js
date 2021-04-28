@@ -277,7 +277,7 @@ app.post('/', express.json(), (req, res) => {
         if(cantidadIngredientes == 1 )
             agent.add(`¿Cuál sería el ingrediente de tu pizza? 📝`);
         else
-            agent.add(`¿Cuáles serían los ${cantidadIngredientes} ingredientes de tu pizza 📝?`);
+            agent.add(`¿Cuáles serían los ${cantidadIngredientes} ingredientes de tu pizza? 📝`);
         
         agent.context.set({
             'name':'ingredients-pizza',
@@ -360,7 +360,7 @@ app.post('/', express.json(), (req, res) => {
 
     function ingredientsPizzaYes(agent){
         const ingredientesContext = agent.context.get('awaiting-ingredients-pizza');
-        agent.add(`Pizza lista!!, ¿me podrías proporcionar los siguientes datos? 😀`);
+        agent.add(`Tu orden está casi lista!! ¿me podrías proporcionar los siguientes datos? 😀`);
         agent.add(`Dirección :`);
 
         
@@ -605,7 +605,7 @@ app.post('/', express.json(), (req, res) => {
 
     async function obtainexitYes(agent){
         const exitContext = agent.context.get('user-exit');
-        const orderBD = await servicio.obtenerPedidos(exitContext.parameters.id); //Usuario de la base de datos
+        const orderBD = await servicio.obtenerPedidos(exitContext.parameters.idPedido); //Usuario de la base de datos
         agent.context.set({
             name:'obtained-name-user', 
             lifespan: 1,
@@ -628,6 +628,8 @@ app.post('/', express.json(), (req, res) => {
 
         const tamaniosPizza = await servicio.obtenerTamanios();
         agent.add('¿Qué tamaño de pizza desea?');
+        agent.add(`Estos son los tamaños: ${tamaniosPizza} 👈`);
+
         for(let tamanioPizza of tamaniosPizza){
             agent.add(new Suggestion(tamanioPizza));
         }
