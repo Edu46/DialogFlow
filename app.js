@@ -637,8 +637,20 @@ app.post('/', express.json(), (req, res) => {
     }
 
     function obtainexitNo(agent){
+        const SesionObject = {
+            session: agent.session,
+            contextInput: 'user-exit',
+            contextOutput: '',
+            parameters: {
+                name: orderBD.name,
+                date: orderBD.date,
+            }
+        }
+        servicio.guardarSesion(SesionObject);
+
         agent.add('Hasta luego! 👋');
         agent.context.set({name: 'user-exit', lifespan:0});
+
     }
 
 
